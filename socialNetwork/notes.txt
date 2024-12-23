@@ -1,9 +1,0 @@
-- User Authentication: Registration, login, and logout.
-- User Profiles: Customizable profiles with bio, profile picture, etc.
-- Friendship System: Following or friending users.
-- Posts: Users can create, edit, and delete posts.
-- Comments and Likes: Interaction on posts.
-- Notifications: Alert users about activities.
-- Real-Time Chat: For private messaging between users.
-- Search: Search for users, posts, or hashtags.
-- Responsive Design: Mobile-friendly UI.
