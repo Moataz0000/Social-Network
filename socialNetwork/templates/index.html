@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'parts/navbar.html' %}
+
+<style>
+    .video-container video {
+        max-width: 100%;
+        max-height: 300px; /* Limit the height to avoid affecting card layout */
+        object-fit: cover; /* Ensures video scales properly without stretching */
+    }
+    .comment-item {
+        display: flex;
+        align-items: start;
+        margin-bottom: 1rem; /* Space between comments */
+    }
+    .comment-item img {
+        margin-right: 1rem;
+    }
+    .comment-item .comment-content {
+        flex: 1;
+    }
+    .comment-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .hidden-comments {
+        display: none;
+    }
+</style>
+
+<!-- Main Content -->
+<div class="container mx-auto mt-8 px-4 pt-16">
+    <!-- Adjusted for fixed navbar -->
+    <div class="flex flex-col lg:flex-row lg:space-x-6">
+        <!-- Sidebar Section for Create Post and Followers -->
+        <aside class="w-full lg:w-1/3 space-y-6">
+            <!-- Create Post Section -->
+            <div class="bg-white shadow-lg rounded-lg p-6" data-aos="fade-right">
+                <div class="flex items-center space-x-4 mb-4">
+                    <img src="https://via.placeholder.com/50" alt="User" class="w-12 h-12 rounded-full">
+                    <div>
+                        <h3 class="font-semibold text-gray-800 text-xl">Create a Post</h3>
+                        <p class="text-sm text-gray-600">Share something with the community</p>
+                    </div>
+                </div>
+                <form method="POST" enctype="multipart/form-data" action="{% url 'posts:create-post' %}">
+                    {% csrf_token %}
+                    <div class="relative mb-4">
+                        <textarea id="content" name="content" required class="w-full h-24 p-4 border border-gray-300 rounded-lg resize-none placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="What's on your mind?" rows="3"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-600 text-sm font-bold mb-2">Visibility</label>
+                        <div class="flex items-center mb-2">
+                            <input id="visibility-public" name="visibility" type="radio" value="public" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" checked>
+                            <label for="visibility-public" class="ml-2 block text-gray-700">Public</label>
+                        </div>
+                        <div class="flex items-center mb-2">
+                            <input id="visibility-followers" name="visibility" type="radio" value="followers" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                            <label for="visibility-followers" class="ml-2 block text-gray-700">Followers Only</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="visibility-private" name="visibility" type="radio" value="private" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                            <label for="visibility-private" class="ml-2 block text-gray-700">Private</label>
+                        </div>
+                    </div>
+                    <div class="flex flex-col space-y-2 mb-4">
+                        <label class="flex flex-col items-center bg-white border border-gray-300 rounded-lg p-2 cursor-pointer hover:bg-gray-100">
+                            <span class="text-sm text-gray-600">Upload Image</span>
+                            <input type="file" name="file" class="hidden">
+                        </label>
+                        <label class="flex flex-col items-center bg-white border border-gray-300 rounded-lg p-2 cursor-pointer hover:bg-gray-100">
+                            <span class="text-sm text-gray-600">Upload Video</span>
+                            <input type="file" name="file" class="hidden">
+                        </label>
+                    </div>
+                    <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg w-full hover:bg-blue-600 transition duration-300">Post</button>
+                </form>
+            </div>
+
+            <!-- Followers Section -->
+            <div class="bg-white shadow-lg rounded-lg p-6" data-aos="fade-right">
+                <h3 class="font-semibold text-gray-800 text-xl mb-4">Followers</h3>
+                <ul class="space-y-4">
+                    <li class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                        <img src="https://via.placeholder.com/50" alt="Follower 1" class="w-12 h-12 rounded-full">
+                        <div class="text-center sm:text-left">
+                            <h4 class="font-semibold text-gray-800 text-lg">Follower 1</h4>
+                            <p class="text-sm text-gray-600">@follower1</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="w-full lg:w-2/3">
+            {% include 'parts/alerts.html' %}
+            <!-- Post Cards -->
+            {% for post in posts %}
+            <div class="bg-white shadow-lg rounded-lg p-6 mb-8 post-card" data-aos="fade-up">
+                <div class="flex items-center mb-4">
+                    {% if post.user.profile.avatar %}
+                    <img src="{{ post.user.profile.avatar.url }}" alt="User" class="w-12 h-12 rounded-full mr-4">
+                    {% else %}
+                    <img src="https://via.placeholder.com/50" alt="User" class="w-12 h-12 rounded-full mr-4">
+                    {% endif %}
+                    <div>
+                        <h3 class="font-semibold text-gray-800 text-lg">{{ post.user }}</h3>
+                        <p class="text-sm text-gray-600">Posted on {{ post.created }}</p>
+                    </div>
+                    <div class="relative ml-auto">
+                        <button class="dropdown-button">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h.01M12 12h.01M18 12h.01"></path>
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg">
+                            <a href="{% url 'posts:update-post' post.id %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Update</a>
+                            <a href="{% url 'posts:delete-post' post.id %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Delete</a>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-gray-700 mb-4">{{ post.content|linebreaksbr }}</p>
+                {% if post.file %}
+                {% if post.post_type == 'image' %}
+                <img src="{{ post.file.url }}" alt="Post Image" class="w-full h-auto rounded-lg mb-4">
+                {% elif post.post_type == 'video' %}
+                <div class="video-container w-full h-auto rounded-lg mb-4">
+                    <video id="video-{{ post.id }}" controls class="w-full rounded-lg">
+                        <source src="{{ post.file.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                {% endif %}
+                {% endif %}
+                <div class="flex items-center space-x-4 text-gray-500">
+                    <button class="hover-btn flex items-center space-x-1">
+                        <i class="fas fa-thumbs-up"></i>
+                        <span>Like</span>
+                    </button>
+                    <button class="hover-btn flex items-center space-x-1 comment-button" data-post-id="{{ post.id }}">
+                        <i class="fas fa-comment"></i>
+                        <span>Comment</span>
+                    </button>
+                    <button class="hover-btn flex items-center space-x-1">
+                        <i class="fas fa-share"></i>
+                        <span>Share</span>
+                    </button>
+                </div><hr>
+                <!-- Comments Section (Initially Hidden) -->
+                <div class="comments-section mt-4" id="comments-{{ post.id }}">
+                    <h4 class="font-semibold text-gray-800 mb-2">Comments</h4>
+                    <div class="space-y-4">
+                        <!-- Display first 2 comments by default -->
+                        <div class="comment-item">
+                            <img src="" alt="User" class="w-8 h-8 rounded-full">
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <p class="font-semibold text-gray-800">Mezo</p>
+                                    <p class="text-sm text-gray-600">1-10-2002</p>
+                                </div>
+                                <p class="text-gray-700">This is the best post forever!</p>
+                            </div>
+                        </div>
+                        <div class="comment-item">
+                            <img src="" alt="User" class="w-8 h-8 rounded-full">
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <p class="font-semibold text-gray-800">Mezo</p>
+                                    <p class="text-sm text-gray-600">1-10-2002</p>
+                                </div>
+                                <p class="text-gray-700">This is the best post forever!</p>
+                            </div>
+                        </div>
+                        <!-- Hidden comments -->
+                        <div class="hidden-comments hidden">
+                            <div class="comment-item">
+                                <img src="" alt="User" class="w-8 h-8 rounded-full">
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <p class="font-semibold text-gray-800">Mezo</p>
+                                        <p class="text-sm text-gray-600">1-10-2054</p>
+                                    </div>
+                                    <p class="text-gray-700">This is the best post forever!</p>
+                                </div>
+                            </div>
+                            <div class="comment-item">
+                                <img src="" alt="User" class="w-8 h-8 rounded-full">
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <p class="font-semibold text-gray-800">Mezo</p>
+                                        <p class="text-sm text-gray-600">1-10-2054</p>
+                                    </div>
+                                    <p class="text-gray-700">This is the best post forever!</p>
+                                </div>
+                            </div>
+                            <div class="comment-item">
+                                <img src="" alt="User" class="w-8 h-8 rounded-full">
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <p class="font-semibold text-gray-800">Mezo</p>
+                                        <p class="text-sm text-gray-600">1-10-2054</p>
+                                    </div>
+                                    <p class="text-gray-700">This is the best post forever!</p>
+                                </div>
+                            </div>
+                            <div class="comment-item">
+                                <img src="" alt="User" class="w-8 h-8 rounded-full">
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <p class="font-semibold text-gray-800">Mezo</p>
+                                        <p class="text-sm text-gray-600">1-10-2054</p>
+                                    </div>
+                                    <p class="text-gray-700">This is the best post forever!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Form to Add a New Comment -->
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <div class="mt-4">
+                            <textarea name="content" required class="w-full h-20 p-2 border border-gray-300 rounded-lg resize-none placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Add a comment..."></textarea>
+                        </div>
+                        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg mt-2 hover:bg-blue-600 transition duration-300">Post Comment</button>
+                    </form>
+                </div>
+                <!-- Button to show all comments -->
+                <button class="show-comments-btn text-blue-500 mt-2" data-post-id="{{ post.id }}">Show all comments</button>
+            </div>
+            {% endfor %}
+        </main>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+    AOS.init();
+
+    // Dropdown toggle
+    document.querySelectorAll('.dropdown-button').forEach(button => {
+        button.addEventListener('click', function (event) {
+            const dropdownMenu = this.nextElementSibling;
+            dropdownMenu.classList.toggle('hidden');
+            event.stopPropagation();
+        });
+    });
+
+    document.addEventListener('click', function () {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.classList.add('hidden');
+        });
+    });
+
+    function checkVideoVisibility() {
+        const videos = document.querySelectorAll('video');
+        videos.forEach(video => {
+            const rect = video.getBoundingClientRect();
+            const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+
+            if (isVisible) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        });
+    }
+
+    window.addEventListener('scroll', checkVideoVisibility);
+    window.addEventListener('resize', checkVideoVisibility);
+    document.addEventListener('DOMContentLoaded', checkVideoVisibility);
+
+    // Show all comments
+    document.querySelectorAll('.show-comments-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const postId = this.getAttribute('data-post-id');
+            const commentsSection = document.getElementById(`comments-${postId}`);
+            const hiddenComments = commentsSection.querySelectorAll('.hidden-comments');
+            hiddenComments.forEach(comment => comment.classList.remove('hidden'));
+            this.classList.add('hidden');
+        });
+    });
+
+    // Show all comments on scroll
+    window.addEventListener('scroll', function () {
+        document.querySelectorAll('.comments-section').forEach(section => {
+            if (section.getBoundingClientRect().top <= window.innerHeight) {
+                const hiddenComments = section.querySelectorAll('.hidden-comments');
+                hiddenComments.forEach(comment => comment.classList.remove('hidden'));
+                const showCommentsBtn = section.querySelector('.show-comments-btn');
+                if (showCommentsBtn) {
+                    showCommentsBtn.classList.add('hidden');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
