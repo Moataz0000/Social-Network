@@ -10,6 +10,7 @@ A simple social network built using Django, allowing users to create posts, like
 - **Comment System**: Users can comment on posts.
 - **Share System**: Users can share posts with others.
 - **Profile Pictures**: Users can upload an avatar to their profile.
+- **Dark Mode**:Dark mode option to allow users choices.
 
 ## Installation
 
@@ -18,4 +19,6 @@ A simple social network built using Django, allowing users to create posts, like
 - Django
 - PostgreSQL (optional)
 
+## Home 
 
+![Screenshot from 2024-12-23 04-24-07](https://github.com/user-attachments/assets/00d838f0-d52a-42c5-bd34-02b1367e5dad)
